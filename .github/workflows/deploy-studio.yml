@@ -19,24 +19,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
-          
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
+          cache: 'npm'
           
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
         
       - name: Build Sanity Studio
-        run: pnpm build
+        run: npm run build
         env:
           SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
           SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
           
       - name: Deploy to Sanity
-        run: pnpm deploy --no-build
+        run: npm run deploy
         env:
           SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
           SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
