@@ -7,12 +7,22 @@ export default defineConfig({
   name: 'default',
   title: 'DataDAOs',
 
-  projectId: 'ubny5ew0',
-  dataset: 'moksha',
+  projectId: 'o4sryq32',
+  dataset: 'mainnet',
 
   plugins: [structureTool(), visionTool()],
 
   schema: {
     types: schemaTypes,
+  },
+
+  document: {
+    newDocumentOptions: (prev, { currentUser, creationContext }) => {
+      const { type, schemaType } = creationContext;
+      if (type === 'structure' && schemaType === 'dataDAO') {
+        return [];
+      }
+      return prev;
+    },
   },
 })

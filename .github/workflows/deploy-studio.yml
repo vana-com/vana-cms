@@ -1,0 +1,46 @@
+name: Deploy Sanity Studio
+
+on:
+  push:
+    branches:
+      - main
+  # Allow manual triggering for testing
+  workflow_dispatch:
+
+jobs:
+  deploy-studio:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Build Sanity Studio
+        run: pnpm build
+        env:
+          SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+          SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
+          
+      - name: Deploy to Sanity
+        run: pnpm deploy --no-build
+        env:
+          SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
+          SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
+          SANITY_DEPLOY_TOKEN: ${{ secrets.SANITY_DEPLOY_TOKEN }}
+          
+      - name: Log deployment completion
+        run: echo "Sanity Studio deployed successfully at $(date)"

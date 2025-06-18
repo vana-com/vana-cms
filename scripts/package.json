@@ -1,0 +1,24 @@
+{
+  "name": "datadao-cms-updater",
+  "version": "1.0.0",
+  "description": "Updates DataDAO information from Vana subgraph",
+  "main": "update-datadaos.ts",
+  "scripts": {
+    "build": "tsc",
+    "update": "tsx update-datadaos.ts",
+    "test": "tsx test-connection.ts",
+    "dev": "tsx watch update-datadaos.ts"
+  },
+  "dependencies": {
+    "@sanity/client": "^6.29.1",
+    "dotenv": "^16.5.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.1",
+    "@types/node-fetch": "^2.6.12",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "type": "module"
+}
