@@ -10,6 +10,7 @@ on:
 jobs:
   deploy-studio:
     runs-on: ubuntu-latest
+    environment: mainnet
     
     steps:
       - name: Checkout repository
