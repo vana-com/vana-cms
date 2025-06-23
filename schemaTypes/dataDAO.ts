@@ -393,26 +393,11 @@ export const dataDAO = defineType({
     // Tokenomics
 
     defineField({
-      name: 'tokenContract',
-      type: 'string',
-      title: 'Token Contract Address',
-      description: 'Ethereum contract address for the token (synced from on-chain)',
-      validation: (Rule) =>
-        Rule.regex(/^0x[a-fA-F0-9]{40}$/, {
-          name: 'ethereum-address',
-          invert: false,
-        }),
-      readOnly: true,
-      fieldset: 'tokenomics',
-    }),
-
-    defineField({
-      name: 'tokenSymbol',
-      type: 'string',
-      title: 'Token Symbol',
-      description: 'Token symbol (e.g., $BOPS) (auto-synced from VanaScan)',
-      validation: (Rule) => Rule.max(10),
-      readOnly: true,
+      name: 'token',
+      type: 'reference',
+      title: 'Associated Token',
+      description: 'Token associated with this DataDAO (optional two-way relationship)',
+      to: [{type: 'token'}],
       fieldset: 'tokenomics',
     }),
 
@@ -476,14 +461,14 @@ export const dataDAO = defineType({
   preview: {
     select: {
       title: 'name',
-      subtitle: 'tokenSymbol',
+      tokenSymbol: 'token.tokenSymbol',
       media: 'icon',
     },
     prepare(selection) {
-      const {title, subtitle, media} = selection
+      const {title, tokenSymbol, media} = selection
       return {
         title,
-        subtitle: subtitle ? `Token: ${subtitle}` : 'No token symbol',
+        subtitle: tokenSymbol ? `Token: ${tokenSymbol}` : 'No associated token',
         media,
       }
     },

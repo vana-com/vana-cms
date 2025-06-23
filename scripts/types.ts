@@ -71,6 +71,16 @@ export interface ProcessedDlpInfo {
   tokenSymbol?: string
 }
 
+export interface SanityToken {
+  _id: string
+  tokenContract: string
+  tokenSymbol: string
+  tokenName?: string
+  icon?: any
+  description?: string
+  associatedDataDAO?: {_ref: string, _type: 'reference'}
+}
+
 export interface SanityDataDAO {
   _id: string
   id: number
@@ -79,8 +89,7 @@ export interface SanityDataDAO {
   website?: string
   description?: string
   icon?: any
-  tokenContract?: string
-  tokenSymbol?: string
+  token?: {_ref: string, _type: 'reference'}
   contributorCount?: number
   filesCount?: number
   isVerified?: boolean
@@ -91,6 +100,15 @@ export interface SanityDataDAO {
   dataDescription?: string
 }
 
+export interface SanityTokenUpdateData {
+  tokenContract?: string
+  tokenSymbol?: string
+  tokenName?: string
+  icon?: any
+  description?: string
+  associatedDataDAO?: {_ref: string, _type: 'reference'}
+}
+
 export interface SanityUpdateData {
   id?: number
   name?: string
@@ -98,8 +116,7 @@ export interface SanityUpdateData {
   website?: string
   description?: string
   icon?: any
-  tokenContract?: string
-  tokenSymbol?: string
+  token?: {_ref: string, _type: 'reference'}
   contributorCount?: number
   filesCount?: number
   isVerified?: boolean

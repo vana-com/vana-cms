@@ -25,6 +25,7 @@
 
 # Typescript
 *.tsbuildinfo
+/scripts/dist
 
 # Dotenv and similar local-only files
 *.local

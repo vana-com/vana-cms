@@ -7,7 +7,9 @@ import type {
   Config,
   ProcessedDlpInfo,
   SanityDataDAO,
+  SanityToken,
   SanityUpdateData,
+  SanityTokenUpdateData,
   SubgraphResponse,
   SubgraphRefiner,
   RefinerSchemaData,
@@ -101,12 +103,13 @@ async function fetchRefinerSchemaData(schemaUrl: string): Promise<RefinerSchemaD
 
     // Extract name and description from the schema JSON
     if (schemaJson && typeof schemaJson === 'object') {
+      const jsonObj = schemaJson as any // Type assertion for dynamic JSON object
       const refinerData: RefinerSchemaData = {
-        name: schemaJson.name || '',
-        description: schemaJson.description || '',
-        version: schemaJson.version || '',
-        dialect: schemaJson.dialect || '',
-        schema: schemaJson.schema || '',
+        name: jsonObj.name || '',
+        description: jsonObj.description || '',
+        version: jsonObj.version || '',
+        dialect: jsonObj.dialect || '',
+        schema: jsonObj.schema || '',
       }
 
       log('debug', `Successfully parsed refiner schema:`, refinerData)
@@ -140,7 +143,7 @@ async function fetchTokenSymbol(tokenAddress: string): Promise<string | undefine
       return undefined
     }
 
-    const tokenData: VanaScanTokenResponse = await response.json()
+    const tokenData = await response.json() as VanaScanTokenResponse
 
     if (tokenData?.token?.symbol) {
       log('debug', `Successfully fetched token symbol: ${tokenData.token.symbol}`)
@@ -203,6 +206,91 @@ async function uploadImageFromUrl(imageUrl: string, filename: string): Promise<a
   }
 }
 
+// Create or update a token document in Sanity
+async function createOrUpdateToken(
+  tokenContract: string,
+  tokenSymbol: string,
+  iconUrl?: string,
+  description?: string,
+  dataDAODocumentId?: string,
+): Promise<string | null> {
+  try {
+    if (!tokenContract || !isValidEthereumAddress(tokenContract)) {
+      return null
+    }
+
+    const tokenId = `token-${tokenContract.toLowerCase()}`
+
+    // Check if token already exists
+    const existingToken: SanityToken | null = await sanityClient.fetch(
+      `*[_type == "token" && tokenContract == $tokenContract][0]`,
+      {tokenContract: tokenContract.toLowerCase()},
+      {perspective: 'raw'},
+    )
+
+    const tokenData: SanityTokenUpdateData = {
+      tokenContract: tokenContract.toLowerCase(),
+      tokenSymbol: tokenSymbol || '',
+    }
+
+    // Auto-populate tokenName from tokenSymbol if token name is empty, but preserve manual edits
+    if (tokenSymbol && (!existingToken?.tokenName || existingToken.tokenName.trim() === '')) {
+      tokenData.tokenName = tokenSymbol
+    }
+
+    // Upload icon from URL if available and not already set (preserving manual edits)
+    if (iconUrl && iconUrl.trim() && !existingToken?.icon) {
+      const iconAsset = await uploadImageFromUrl(
+        iconUrl.trim(),
+        `token-${tokenContract.toLowerCase()}-icon`,
+      )
+      if (iconAsset) {
+        tokenData.icon = iconAsset
+      }
+    }
+
+    // Auto-populate description from DataDAO if token description is empty, but preserve manual edits
+    if (description && (!existingToken?.description || existingToken.description.trim() === '')) {
+      tokenData.description = description
+    }
+
+    // Handle two-way relationship with DataDAO (1:1 relationship)
+    if (dataDAODocumentId) {
+      tokenData.associatedDataDAO = {
+        _type: 'reference' as const,
+        _ref: dataDAODocumentId,
+      }
+    }
+
+    let documentId: string
+
+    if (existingToken) {
+      // Update existing token
+      documentId = existingToken._id
+      log('debug', `Updating existing token: ${documentId}`)
+      await sanityClient.patch(documentId).set(tokenData).commit()
+    } else {
+      // Create new token as published (not draft) so it can be immediately referenced
+      documentId = tokenId
+      log('debug', `Creating new published token: ${documentId}`)
+
+      const document = {
+        _id: documentId,
+        _type: 'token',
+        ...tokenData,
+      }
+
+      await sanityClient.createOrReplace(document)
+    }
+
+    log('info', `Successfully processed token ${tokenSymbol} (${tokenContract})`)
+    return documentId
+  } catch (error: any) {
+    log('error', `Failed to create/update token ${tokenContract}:`, {error: error.message})
+    return null
+  }
+}
+
 /**
  * TWO-TIER FIELD UPDATE SYSTEM:
  *
@@ -220,6 +308,9 @@ async function uploadImageFromUrl(imageUrl: string, filename: string): Promise<a
 // Map subgraph data that should always override manual edits (source of truth: subgraph)
 async function mapSubgraphAuthorityFields(
   subgraphData: ProcessedDlpInfo,
+  iconUrl?: string,
+  description?: string,
+  dataDAODocumentId?: string,
 ): Promise<Partial<SanityUpdateData>> {
   const mapped: Partial<SanityUpdateData> = {}
 
@@ -228,19 +319,28 @@ async function mapSubgraphAuthorityFields(
     mapped.contractAddress = subgraphData.address.toLowerCase()
   }
 
-  // Token contract address - always from subgraph
+  // Token reference - create or update token document and reference it
   if (
     subgraphData.token &&
     subgraphData.token.trim() !== '' &&
     isValidEthereumAddress(subgraphData.token) &&
-    isNonZeroAddress(subgraphData.token)
+    isNonZeroAddress(subgraphData.token) &&
+    subgraphData.tokenSymbol
   ) {
-    mapped.tokenContract = subgraphData.token.toLowerCase()
-  }
+    const tokenDocumentId = await createOrUpdateToken(
+      subgraphData.token,
+      subgraphData.tokenSymbol,
+      iconUrl,
+      description,
+      dataDAODocumentId,
+    )
 
-  // Token symbol - always from VanaScan API
-  if (subgraphData.tokenSymbol) {
-    mapped.tokenSymbol = subgraphData.tokenSymbol
+    if (tokenDocumentId) {
+      mapped.token = {
+        _type: 'reference',
+        _ref: tokenDocumentId,
+      }
+    }
   }
 
   // Verification status - always from subgraph
@@ -327,6 +427,7 @@ async function mapSubgraphDataToSanity(
   subgraphData: ProcessedDlpInfo,
   isNewDocument = false,
   existingData?: SanityDataDAO,
+  dataDAODocumentId?: string,
 ): Promise<SanityUpdateData> {
   const mapped: SanityUpdateData = {}
 
@@ -335,8 +436,16 @@ async function mapSubgraphDataToSanity(
     mapped.id = subgraphData.id
   }
 
-  // Get authority fields (always override)
-  const authorityFields = await mapSubgraphAuthorityFields(subgraphData)
+  // Get initial fields first to determine description for token
+  const initialFields = await mapSubgraphInitialFields(subgraphData, existingData)
+
+  // Get authority fields (always override) - pass iconUrl, description, and DataDAO ID for token creation
+  const authorityFields = await mapSubgraphAuthorityFields(
+    subgraphData,
+    subgraphData.iconUrl,
+    initialFields.description ?? existingData?.description,
+    dataDAODocumentId,
+  )
   Object.assign(mapped, authorityFields)
 
   if (Object.keys(authorityFields).length > 0) {
@@ -347,8 +456,7 @@ async function mapSubgraphDataToSanity(
     )
   }
 
-  // Get initial fields (only if not manually set)
-  const initialFields = await mapSubgraphInitialFields(subgraphData, existingData)
+  // Apply initial fields (only if not manually set)
   Object.assign(mapped, initialFields)
 
   if (Object.keys(initialFields).length > 0) {
@@ -467,10 +575,10 @@ async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
 // Create a new DataDAO document in Sanity
 async function createDataDAOInSanity(subgraphData: ProcessedDlpInfo): Promise<UpdateResult> {
   try {
-    const mappedData = await mapSubgraphDataToSanity(subgraphData, true)
-
     // Generate a unique document ID based on DLP ID
     const documentId = `drafts.dataDAO-${subgraphData.id}`
+
+    const mappedData = await mapSubgraphDataToSanity(subgraphData, true, undefined, documentId)
 
     log('debug', `Creating new document ${documentId} with data:`, mappedData)
 
@@ -498,7 +606,7 @@ async function updateDataDAOInSanity(
   existingData: SanityDataDAO,
 ): Promise<UpdateResult> {
   try {
-    const mappedData = await mapSubgraphDataToSanity(subgraphData, false, existingData)
+    const mappedData = await mapSubgraphDataToSanity(subgraphData, false, existingData, documentId)
 
     if (Object.keys(mappedData).length === 0) {
       log(
@@ -549,8 +657,7 @@ async function updateAllDataDAOs(): Promise<UpdateStats> {
         website,
         description,
         icon,
-        tokenContract,
-        tokenSymbol,
+        token,
         contributorCount,
         filesCount,
         isVerified,
@@ -682,7 +789,7 @@ async function testConnections(): Promise<boolean> {
       throw new Error(`Subgraph test failed: ${testResponse.status}`)
     }
 
-    const testResult = await testResponse.json()
+    const testResult = await testResponse.json() as any
     log('info', 'Subgraph connection: OK', {sampleData: testResult.data?.dlps?.[0]})
 
     return true
