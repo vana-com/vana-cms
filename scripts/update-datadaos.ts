@@ -19,7 +19,9 @@ import type {
 } from './types.js'
 
 // Load environment variables
-dotenv.config()
+dotenv.config({
+  path: process.env.DOTENV_CONFIG_PATH || '.env'
+})
 
 // Configuration
 const config: Config = {

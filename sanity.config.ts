@@ -3,26 +3,39 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 
-export default defineConfig({
-  name: 'default',
-  title: 'DataDAOs',
-
+const sharedConfig = {
   projectId: 'o4sryq32',
-  dataset: 'mainnet',
-
   plugins: [structureTool(), visionTool()],
-
   schema: {
     types: schemaTypes,
   },
-
   document: {
-    newDocumentOptions: (prev, { currentUser, creationContext }) => {
-      const { type, schemaType } = creationContext;
+    newDocumentOptions: (
+      prev: any,
+      {creationContext}: {creationContext: {type: string; schemaType?: string}},
+    ) => {
+      const {type, schemaType} = creationContext
       if (type === 'structure' && schemaType === 'dataDAO') {
-        return [];
+        return []
       }
-      return prev;
+      return prev
     },
   },
-})
+}
+
+export default defineConfig([
+  {
+    ...sharedConfig,
+    name: 'mainnet',
+    title: 'Mainnet',
+    basePath: '/mainnet',
+    dataset: 'mainnet',
+  },
+  {
+    ...sharedConfig,
+    name: 'moksha',
+    title: 'Moksha',
+    basePath: '/moksha',
+    dataset: 'moksha',
+  },
+])

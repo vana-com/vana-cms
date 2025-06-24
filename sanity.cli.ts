@@ -4,7 +4,6 @@ export default defineCliConfig({
   studioHost: 'vana',
   api: {
     projectId: 'o4sryq32',
-    dataset: 'mainnet',
   },
   /**
    * Enable auto-updates for studios.

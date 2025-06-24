@@ -6,7 +6,9 @@ import fetch from 'node-fetch'
 import type {Config, SubgraphResponse} from './types.js'
 
 // Load environment variables
-dotenv.config()
+dotenv.config({
+  path: process.env.DOTENV_CONFIG_PATH || '.env'
+})
 
 // Configuration (same as main script)
 const config: Config = {
