@@ -20,7 +20,7 @@ import type {
 
 // Load environment variables
 dotenv.config({
-  path: process.env.DOTENV_CONFIG_PATH || '.env'
+  path: process.env.DOTENV_CONFIG_PATH || '.env',
 })
 
 // Configuration
@@ -145,7 +145,7 @@ async function fetchTokenSymbol(tokenAddress: string): Promise<string | undefine
       return undefined
     }
 
-    const tokenData = await response.json() as VanaScanTokenResponse
+    const tokenData = (await response.json()) as VanaScanTokenResponse
 
     if (tokenData?.token?.symbol) {
       log('debug', `Successfully fetched token symbol: ${tokenData.token.symbol}`)
@@ -326,22 +326,32 @@ async function mapSubgraphAuthorityFields(
     subgraphData.token &&
     subgraphData.token.trim() !== '' &&
     isValidEthereumAddress(subgraphData.token) &&
-    isNonZeroAddress(subgraphData.token) &&
-    subgraphData.tokenSymbol
+    isNonZeroAddress(subgraphData.token)
   ) {
+    log('debug', `Creating token for DLP ${subgraphData.id}: ${subgraphData.token} (symbol: ${subgraphData.tokenSymbol || 'not available'})`)
+    
     const tokenDocumentId = await createOrUpdateToken(
       subgraphData.token,
-      subgraphData.tokenSymbol,
+      subgraphData.tokenSymbol || '',
       iconUrl,
       description,
       dataDAODocumentId,
     )
 
     if (tokenDocumentId) {
+      log('info', `Successfully created/updated token for DLP ${subgraphData.id}: ${tokenDocumentId}`)
       mapped.token = {
         _type: 'reference',
         _ref: tokenDocumentId,
       }
+    } else {
+      log('error', `Failed to create token for DLP ${subgraphData.id} with address ${subgraphData.token}`)
+    }
+  } else {
+    if (subgraphData.token && subgraphData.token.trim() !== '') {
+      log('debug', `Skipping token creation for DLP ${subgraphData.id}: token address ${subgraphData.token} failed validation`)
+    } else {
+      log('debug', `No token address found for DLP ${subgraphData.id}`)
     }
   }
 
@@ -472,63 +482,94 @@ async function mapSubgraphDataToSanity(
   return mapped
 }
 
-// Fetch DLP data from subgraph
+// Fetch DLP data from subgraph with pagination
 async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
   try {
-    log('info', 'Fetching DLP data from subgraph...')
+    log('info', 'Fetching DLP data from subgraph')
 
-    const query = `
-      query {
-        dlps {
-          name
-          id
-          address
-          creator
-          token
-          owner
-          treasury
-          isVerified
-          isRewardEligible
-          createdAt
-          metadata
-          iconUrl
-          website
-          totals {
-            totalFileContributions
-            uniqueFileContributors
-          }
-          refiners {
+    const pageSize = 100 // GraphQL pagination limit
+    let allDlps: any[] = []
+    let skip = 0
+    let hasMore = true
+    let pageCount = 0
+
+    while (hasMore) {
+      pageCount++
+      log('debug', `Fetching page ${pageCount} (skip: ${skip}, first: ${pageSize})`)
+
+      const query = `
+        query {
+          dlps(first: ${pageSize}, skip: ${skip}, orderBy: id, orderDirection: asc) {
+            name
             id
-            schemaDefinitionUrl
+            address
+            creator
+            token
+            owner
+            treasury
+            isVerified
+            isRewardEligible
+            createdAt
+            metadata
+            iconUrl
+            website
+            totals {
+              totalFileContributions
+              uniqueFileContributors
+            }
+            refiners {
+              id
+              schemaDefinitionUrl
+            }
           }
         }
+      `
+
+      const response = await fetch(config.subgraph.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({query}),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
-    `
 
-    const response = await fetch(config.subgraph.url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({query}),
-    })
+      const result: SubgraphResponse = (await response.json()) as SubgraphResponse
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      if (!result.data || !result.data.dlps) {
+        throw new Error('Invalid response format from subgraph')
+      }
+
+      const pageDlps = result.data.dlps
+      allDlps.push(...pageDlps)
+
+      log(
+        'info',
+        `Page ${pageCount}: Fetched ${pageDlps.length} DLPs (total so far: ${allDlps.length})`,
+      )
+
+      // Check if we have more data to fetch
+      hasMore = pageDlps.length === pageSize
+      skip += pageSize
+
+      // Add small delay between requests to be respectful to the API
+      if (hasMore) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
     }
 
-    const result: SubgraphResponse = (await response.json()) as SubgraphResponse
-
-    if (!result.data || !result.data.dlps) {
-      throw new Error('Invalid response format from subgraph')
-    }
-
-    log('info', `Fetched ${result.data.dlps.length} DLPs from subgraph`)
+    log(
+      'info',
+      `Successfully fetched all ${allDlps.length} DLPs from subgraph in ${pageCount} pages`,
+    )
 
     // Process the subgraph data
     const processedData: ProcessedDlpInfo[] = []
 
-    for (const dlp of result.data.dlps) {
+    for (const dlp of allDlps) {
       const refinerInfo = getLatestRefinerInfo(dlp.refiners)
       let refinerSchemaData: RefinerSchemaData | undefined
       let tokenSymbol: string | undefined
@@ -540,7 +581,13 @@ async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
 
       // Fetch token symbol if token address is available
       if (dlp.token && isValidEthereumAddress(dlp.token) && isNonZeroAddress(dlp.token)) {
+        log('debug', `Fetching token symbol for DLP ${dlp.id} token: ${dlp.token}`)
         tokenSymbol = await fetchTokenSymbol(dlp.token)
+        if (tokenSymbol) {
+          log('debug', `Found token symbol for DLP ${dlp.id}: ${tokenSymbol}`)
+        } else {
+          log('debug', `No token symbol found for DLP ${dlp.id} token: ${dlp.token}`)
+        }
       }
 
       processedData.push({
@@ -791,7 +838,7 @@ async function testConnections(): Promise<boolean> {
       throw new Error(`Subgraph test failed: ${testResponse.status}`)
     }
 
-    const testResult = await testResponse.json() as any
+    const testResult = (await testResponse.json()) as any
     log('info', 'Subgraph connection: OK', {sampleData: testResult.data?.dlps?.[0]})
 
     return true
