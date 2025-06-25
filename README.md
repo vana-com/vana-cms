@@ -128,3 +128,172 @@ npm run dev             # Watch mode for development
 | `SANITY_WRITE_TOKEN` | API token with write permissions | `sk_test_...` |
 | `SUBGRAPH_URL` | Vana subgraph GraphQL endpoint | `https://api.goldsky.com/api/public/...` |
 | `VANASCAN_API_URL` | VanaScan API for token data | `https://vanascan.io` |
+
+## 🔍 GROQ Query Examples
+
+The CMS provides powerful querying capabilities using GROQ (Graph-Relational Object Queries). Here are useful examples for common use cases:
+
+### Token Queries
+
+**Find token by contract address:**
+```groq
+*[_type == "token" && tokenContract == '0x202f120c83dcfce04a1723ae7ec7cdbd2ed73302'] {
+  tokenContract,
+  tokenName,
+  tokenSymbol,
+  description,
+  icon
+}
+```
+
+**Get all tokens with their associated DataDAOs:**
+```groq
+*[_type == "token"] {
+  tokenContract,
+  tokenName,
+  tokenSymbol,
+  associatedDataDAO-> {
+    id,
+    name,
+    contributorCount
+  }
+}
+```
+
+### DataDAO Queries
+
+**Find DataDAOs with active data and refiners:**
+```groq
+*[_type == "dataDAO" && contributorCount > 0 && refinerId != null && dataSchemaRefined != null && dataName != null] {
+  id,
+  name,
+  contributorCount,
+  refinerId,
+  dataSchemaRefined,
+  token-> {
+    tokenSymbol,
+    tokenContract
+  }
+}
+```
+
+**Get verified DataDAOs with token information:**
+```groq
+*[_type == "dataDAO" && isVerified == true] {
+  id,
+  name,
+  description,
+  website,
+  contributorCount,
+  filesCount,
+  isEligibleForRewards,
+  token-> {
+    tokenSymbol,
+    tokenName,
+    tokenContract
+  }
+} | order(contributorCount desc)
+```
+
+**Find DataDAOs by contribution frequency:**
+```groq
+*[_type == "dataDAO" && frequencyOfContribution == "daily"] {
+  id,
+  name,
+  website,
+  contributorCount,
+  dataContributionSteps,
+  token->tokenSymbol
+}
+```
+
+### Advanced Queries
+
+**DataDAOs with complete tokenomics information:**
+```groq
+*[_type == "dataDAO" && defined(token) && defined(rewardMechanics)] {
+  id,
+  name,
+  contributorCount,
+  rewardMechanics,
+  macroTokenomics,
+  token-> {
+    tokenSymbol,
+    tokenContract,
+    description
+  }
+} | order(contributorCount desc)
+```
+
+**Search DataDAOs by data source category:**
+```groq
+*[_type == "dataDAO" && count(dataSources[@->category == "social_media"]) > 0] {
+  id,
+  name,
+  description,
+  dataSources[]-> {
+    name,
+    category,
+    icon
+  }
+}
+```
+
+**Find DataDAOs with music data sources:**
+```groq
+*[_type == "dataDAO" && count(dataSources[@->dataSourceCategory[] match "music"]) > 0] {
+  id,
+  name,
+  description,
+  website,
+  dataSources[]-> {
+    dataSourceName,
+    dataSourceCategory,
+    dataSourceIcon
+  }
+}
+```
+
+**Get DataDAO statistics summary:**
+```groq
+*[_type == "dataDAO"] {
+  "totalDataDAOs": count(*),
+  "verifiedCount": count(*[isVerified == true]),
+  "rewardEligibleCount": count(*[isEligibleForRewards == true]),
+  "totalContributors": sum(contributorCount),
+  "totalFiles": sum(filesCount)
+}
+```
+
+### Data Source Queries
+
+**Get data sources by category:**
+```groq
+*[_type == "dataSource" && category == "shopping"] {
+  name,
+  category,
+  icon
+} | order(name asc)
+```
+
+**Find all categories and their data sources:**
+```groq
+*[_type == "dataSource"] {
+  category,
+  "sources": *[_type == "dataSource" && category == ^.category] {
+    name,
+    icon
+  }
+} | order(category asc)
+```
+
+### Vision Tool Usage
+
+These queries can be tested directly in the Sanity Studio using the Vision tool:
+
+1. Open your Sanity Studio
+2. Navigate to the "Vision" tab
+3. Paste any query above
+4. Click "Execute" to see results
+
+For more GROQ syntax and examples, visit the [GROQ documentation](https://www.sanity.io/docs/groq).

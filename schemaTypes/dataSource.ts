@@ -25,31 +25,36 @@ export const dataSource = defineType({
 
     defineField({
       name: 'dataSourceCategory',
-      type: 'string',
-      title: 'Data Source Category',
-      description: 'Category or type of data source',
-      options: {
-        list: [
-          {title: 'Shopping', value: 'shopping'},
-          {title: 'Social Media', value: 'social-media'},
-          {title: 'Entertainment', value: 'entertainment'},
-          {title: 'Finance & Trading', value: 'finance-trading'},
-          {title: 'Health & Fitness', value: 'health-fitness'},
-          {title: 'Travel', value: 'travel'},
-          {title: 'Productivity', value: 'productivity'},
-          {title: 'Communication', value: 'communication'},
-          {title: 'Education', value: 'education'},
-          {title: 'Gaming', value: 'gaming'},
-          {title: 'News & Media', value: 'news-media'},
-          {title: 'Transportation', value: 'transportation'},
-          {title: 'Food & Dining', value: 'food-dining'},
-          {title: 'Professional', value: 'professional'},
-          {title: 'IoT & Devices', value: 'iot-devices'},
-          {title: 'Other', value: 'other'},
-        ],
-        layout: 'dropdown',
-      },
-      validation: (Rule) => Rule.required(),
+      type: 'array',
+      title: 'Data Source Categories',
+      description: 'Categories or types of data source (multiple allowed)',
+      of: [
+        {
+          type: 'string',
+          options: {
+            list: [
+              {title: 'Shopping', value: 'shopping'},
+              {title: 'Social Media', value: 'social-media'},
+              {title: 'Entertainment', value: 'entertainment'},
+              {title: 'Music', value: 'music'},
+              {title: 'Finance & Trading', value: 'finance-trading'},
+              {title: 'Health & Fitness', value: 'health-fitness'},
+              {title: 'Travel', value: 'travel'},
+              {title: 'Productivity', value: 'productivity'},
+              {title: 'Communication', value: 'communication'},
+              {title: 'Education', value: 'education'},
+              {title: 'Gaming', value: 'gaming'},
+              {title: 'News & Media', value: 'news-media'},
+              {title: 'Transportation', value: 'transportation'},
+              {title: 'Food & Dining', value: 'food-dining'},
+              {title: 'Professional', value: 'professional'},
+              {title: 'IoT & Devices', value: 'iot-devices'},
+              {title: 'Other', value: 'other'},
+            ],
+          },
+        },
+      ],
+      validation: (Rule) => Rule.required().min(1),
     }),
   ],
 
@@ -63,7 +68,7 @@ export const dataSource = defineType({
       const {title, subtitle, media} = selection
       return {
         title,
-        subtitle: subtitle ? `Category: ${subtitle}` : 'No category',
+        subtitle: subtitle && subtitle.length > 0 ? `Categories: ${subtitle.join(', ')}` : 'No categories',
         media,
       }
     },
