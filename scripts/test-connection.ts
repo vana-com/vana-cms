@@ -185,7 +185,6 @@ async function runTests(): Promise<boolean> {
         contributorCount: parseInt(dlp.totals.uniqueFileContributors),
         filesCount: parseInt(dlp.totals.totalFileContributions),
         isVerified: dlp.verificationBlockNumber !== null,
-        isEligibleForRewards: false,
         dataSchemaRefined: getLatestSchemaUrl(dlp.refiners),
       }
 

@@ -251,21 +251,12 @@ export const dataDAO = defineType({
       name: 'isVerified',
       type: 'boolean',
       title: 'Is Verified',
-      description: 'Is this DataDAO verified? (synced from subgraph)',
+      description: 'Is this DataDAO verified? (synced from on-chain)',
       initialValue: false,
       readOnly: true,
       fieldset: 'contribution',
     }),
 
-    defineField({
-      name: 'isEligibleForRewards',
-      type: 'boolean',
-      title: 'Eligible for Rewards',
-      description: 'Is this DataDAO eligible for rewards? (synced from subgraph)',
-      initialValue: false,
-      readOnly: true,
-      fieldset: 'contribution',
-    }),
 
     defineField({
       name: 'proofOfContributionStructure',

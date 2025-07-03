@@ -60,7 +60,6 @@ export interface ProcessedDlpInfo {
   iconUrl: string
   website: string
   isVerified: boolean
-  isRewardEligible: boolean
   createdAt: string
   totalFileContributions: number
   uniqueFileContributors: number
@@ -92,7 +91,6 @@ export interface SanityDataDAO {
   contributorCount?: number
   filesCount?: number
   isVerified?: boolean
-  isEligibleForRewards?: boolean
   dataSchemaRefined?: string
   refinerId?: number
   dataName?: string
@@ -119,7 +117,6 @@ export interface SanityUpdateData {
   contributorCount?: number
   filesCount?: number
   isVerified?: boolean
-  isEligibleForRewards?: boolean
   dataSchemaRefined?: string
   refinerId?: number
   dataName?: string

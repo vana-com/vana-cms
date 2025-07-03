@@ -358,8 +358,6 @@ async function mapSubgraphAuthorityFields(
   // Verification status - always from subgraph
   mapped.isVerified = subgraphData.isVerified
 
-  // Reward eligibility - always from subgraph
-  mapped.isEligibleForRewards = subgraphData.isRewardEligible
 
   // Contributor count - always from subgraph
   mapped.contributorCount = subgraphData.uniqueFileContributors
@@ -601,7 +599,6 @@ async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
         iconUrl: dlp.iconUrl,
         website: dlp.website,
         isVerified: dlp.verificationBlockNumber !== null,
-        isRewardEligible: false, // @TODO: Implement this later
         createdAt: dlp.createdAt,
         totalFileContributions: parseInt(dlp.totals.totalFileContributions),
         uniqueFileContributors: parseInt(dlp.totals.uniqueFileContributors),
