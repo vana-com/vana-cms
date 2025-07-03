@@ -18,8 +18,7 @@ export interface SubgraphDlp {
   token: string
   owner: string
   treasury: string
-  isVerified: boolean
-  isRewardEligible?: boolean
+  verificationBlockNumber: string | null
   createdAt: string
   metadata: string
   iconUrl: string

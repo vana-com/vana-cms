@@ -507,8 +507,7 @@ async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
             token
             owner
             treasury
-            isVerified
-            isRewardEligible
+            verificationBlockNumber
             createdAt
             metadata
             iconUrl
@@ -601,8 +600,8 @@ async function fetchSubgraphData(): Promise<ProcessedDlpInfo[]> {
         metadata: dlp.metadata,
         iconUrl: dlp.iconUrl,
         website: dlp.website,
-        isVerified: dlp.isVerified,
-        isRewardEligible: dlp.isRewardEligible || false,
+        isVerified: dlp.verificationBlockNumber !== null,
+        isRewardEligible: false, // @TODO: Implement this later
         createdAt: dlp.createdAt,
         totalFileContributions: parseInt(dlp.totals.totalFileContributions),
         uniqueFileContributors: parseInt(dlp.totals.uniqueFileContributors),

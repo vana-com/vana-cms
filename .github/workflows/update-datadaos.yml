@@ -10,7 +10,10 @@ on:
 jobs:
   update-datadaos:
     runs-on: ubuntu-latest
-    environment: mainnet
+    strategy:
+      matrix:
+        environment: [mainnet, moksha]
+    environment: ${{ matrix.environment }}
     
     steps:
       - name: Checkout repository
@@ -29,7 +32,7 @@ jobs:
       - name: Update DataDAO information
         run: |
           cd scripts
-          npm run update
+          npm run update${{ matrix.environment == 'moksha' && ':moksha' || '' }}
         env:
           SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }}
           SANITY_DATASET: ${{ secrets.SANITY_DATASET }}
@@ -37,4 +40,4 @@ jobs:
           SUBGRAPH_URL: ${{ secrets.SUBGRAPH_URL }}
           
       - name: Log completion
-        run: echo "DataDAO update completed at $(date)"
+        run: echo "DataDAO update completed for ${{ matrix.environment }} at $(date)"

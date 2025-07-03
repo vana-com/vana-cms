@@ -7,7 +7,7 @@ import type {Config, SubgraphResponse} from './types.js'
 
 // Load environment variables
 dotenv.config({
-  path: process.env.DOTENV_CONFIG_PATH || '.env'
+  path: process.env.DOTENV_CONFIG_PATH || '.env',
 })
 
 // Configuration (same as main script)
@@ -78,7 +78,7 @@ async function runTests(): Promise<boolean> {
           id
           name
           address
-          isVerified
+          verificationBlockNumber
           totals {
             totalFileContributions
             uniqueFileContributors
@@ -135,7 +135,7 @@ async function runTests(): Promise<boolean> {
           token
           owner
           treasury
-          isVerified
+          verificationBlockNumber
           iconUrl
           website
           totals {
@@ -184,8 +184,8 @@ async function runTests(): Promise<boolean> {
             : undefined,
         contributorCount: parseInt(dlp.totals.uniqueFileContributors),
         filesCount: parseInt(dlp.totals.totalFileContributions),
-        isVerified: dlp.isVerified,
-        isEligibleForRewards: dlp.isRewardEligible || false,
+        isVerified: dlp.verificationBlockNumber !== null,
+        isEligibleForRewards: false,
         dataSchemaRefined: getLatestSchemaUrl(dlp.refiners),
       }
 
