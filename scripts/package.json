@@ -10,7 +10,9 @@
     "test": "tsx test-connection.ts",
     "test:moksha": "DOTENV_CONFIG_PATH=.env.moksha tsx test-connection.ts",
     "dev": "tsx watch update-datadaos.ts",
-    "dev:moksha": "DOTENV_CONFIG_PATH=.env.moksha tsx watch update-datadaos.ts"
+    "dev:moksha": "DOTENV_CONFIG_PATH=.env.moksha tsx watch update-datadaos.ts",
+    "remove-field": "tsx remove-field.ts",
+    "remove-field:moksha": "DOTENV_CONFIG_PATH=.env.moksha tsx remove-field.ts"
   },
   "dependencies": {
     "@sanity/client": "^6.29.1",

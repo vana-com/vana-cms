@@ -70,8 +70,7 @@ The repository includes a GitHub Action that runs automatically every hour. The 
 | `token`                           | `tokenContract`        | Authority | Token contract address          |
 | `totals.uniqueFileContributors`   | `contributorCount`     | Authority | Number of contributors          |
 | `totals.totalFileContributions`   | `filesCount`           | Authority | Number of files contributed     |
-| `isVerified`                      | `isVerified`           | Authority | Verification status             |
-| `isRewardEligible`                | `isEligibleForRewards` | Authority | Reward eligibility status       |
+| `verificationBlockNumber`         | `isVerified`           | Authority | Verification status (calculated from block number) |
 | `refiners[latest].schemaDefinitionUrl` | `dataSchemaRefined` | Authority | Latest refiner schema URL       |
 | `refiners[latest].id`             | `refinerId`            | Authority | Latest refiner ID               |
 
@@ -127,3 +126,43 @@ Comprehensive TypeScript type definitions covering:
 - **Configuration**: Environment settings and client configurations
 - **Processing Types**: Intermediate data structures and update results
 - **Utility Types**: Update statistics and operation results
+
+### `remove-field.ts`
+
+Utility script for safely removing fields from Sanity CMS documents:
+
+- **Generic Field Removal**: Remove any field from any document type with a single command
+- **Multi-Environment Support**: Works with both mainnet and moksha environments
+- **Safety Features**: Dry-run mode, confirmation prompts, and backup reminders
+- **Batch Processing**: Efficiently handles large datasets with progress tracking
+- **Error Handling**: Continues processing if individual documents fail
+- **Comprehensive Logging**: Detailed progress updates and completion statistics
+
+**Usage Examples:**
+```bash
+# Remove field from mainnet (default)
+npm run remove-field dataDAO fieldName
+
+# Preview changes without executing (safe)
+npm run remove-field dataDAO fieldName -- --dry-run
+
+# Remove field from moksha environment
+npm run remove-field:moksha dataDAO fieldName
+
+# Or use environment parameter
+npm run remove-field dataDAO fieldName -- --env moksha
+
+# Show help
+npm run remove-field -- --help
+```
+
+**Safety Guidelines:**
+- ⚠️ **Always backup your dataset before running field removal**
+- 🔍 **Use `--dry-run` first to preview changes**
+- ✅ **Test on moksha environment before running on mainnet**
+- 📝 **Document which fields you're removing and why**
+
+**Common Use Cases:**
+- Remove deprecated fields after schema changes
+- Clean up test data or incorrectly populated fields
+- Bulk field removal when restructuring documents
