@@ -186,7 +186,6 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
   website,
   contributorCount,
   filesCount,
-  isEligibleForRewards,
   token-> {
     tokenSymbol,
     tokenName,
@@ -202,7 +201,7 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
   name,
   website,
   contributorCount,
-  dataContributionSteps,
+  contributionSteps,
   token->tokenSymbol
 }
 ```
@@ -211,12 +210,12 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
 
 **DataDAOs with complete tokenomics information:**
 ```groq
-*[_type == "dataDAO" && defined(token) && defined(rewardMechanics)] {
+*[_type == "dataDAO" && defined(token) && defined(tokenomicsRewardMechanics)] {
   id,
   name,
   contributorCount,
-  rewardMechanics,
-  macroTokenomics,
+  tokenomicsRewardMechanics,
+  tokenomicsMacro,
   token-> {
     tokenSymbol,
     tokenContract,
@@ -227,21 +226,21 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
 
 **Search DataDAOs by data source category:**
 ```groq
-*[_type == "dataDAO" && count(dataSources[@->category == "social_media"]) > 0] {
+*[_type == "dataDAO" && count(dataSources[@->dataSourceCategory match "social-media"]) > 0] {
   id,
   name,
   description,
   dataSources[]-> {
-    name,
-    category,
-    icon
+    dataSourceName,
+    dataSourceCategory,
+    dataSourceIcon
   }
 }
 ```
 
 **Find DataDAOs with music data sources:**
 ```groq
-*[_type == "dataDAO" && count(dataSources[@->dataSourceCategory[] match "music"]) > 0] {
+*[_type == "dataDAO" && count(dataSources[@->dataSourceCategory match "music"]) > 0] {
   id,
   name,
   description,
@@ -259,7 +258,6 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
 *[_type == "dataDAO"] {
   "totalDataDAOs": count(*),
   "verifiedCount": count(*[isVerified == true]),
-  "rewardEligibleCount": count(*[isEligibleForRewards == true]),
   "totalContributors": sum(contributorCount),
   "totalFiles": sum(filesCount)
 }
@@ -269,22 +267,22 @@ The CMS provides powerful querying capabilities using GROQ (Graph-Relational Obj
 
 **Get data sources by category:**
 ```groq
-*[_type == "dataSource" && category == "shopping"] {
-  name,
-  category,
-  icon
-} | order(name asc)
+*[_type == "dataSource" && "shopping" in dataSourceCategory] {
+  dataSourceName,
+  dataSourceCategory,
+  dataSourceIcon
+} | order(dataSourceName asc)
 ```
 
 **Find all categories and their data sources:**
 ```groq
 *[_type == "dataSource"] {
-  category,
-  "sources": *[_type == "dataSource" && category == ^.category] {
-    name,
-    icon
+  dataSourceCategory,
+  "sources": *[_type == "dataSource" && dataSourceCategory == ^.dataSourceCategory] {
+    dataSourceName,
+    dataSourceIcon
   }
-} | order(category asc)
+} | order(dataSourceCategory asc)
 ```
 
 ### Vision Tool Usage
