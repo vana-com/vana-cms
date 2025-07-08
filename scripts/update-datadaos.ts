@@ -3,6 +3,7 @@
 import {createClient} from '@sanity/client'
 import * as dotenv from 'dotenv'
 import fetch from 'node-fetch'
+import {fetchWithFallback} from './ipfs.js'
 import type {
   Config,
   ProcessedDlpInfo,
@@ -95,7 +96,7 @@ async function fetchRefinerSchemaData(schemaUrl: string): Promise<RefinerSchemaD
 
     log('debug', `Fetching refiner schema from: ${schemaUrl}`)
 
-    const response = await fetch(schemaUrl.trim())
+    const response = await fetchWithFallback(schemaUrl.trim())
     if (!response.ok) {
       log('error', `Failed to fetch refiner schema from ${schemaUrl}: ${response.statusText}`)
       return undefined
