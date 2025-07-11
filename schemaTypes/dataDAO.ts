@@ -171,6 +171,15 @@ export const dataDAO = defineType({
       fieldset: 'basic',
     }),
 
+    defineField({
+      name: 'activelyBuilding',
+      type: 'boolean',
+      title: 'Actively Building',
+      description: 'Whether this DataDAO is actively building on the Vana network',
+      initialValue: false,
+      fieldset: 'basic',
+    }),
+
     // Contact Information
     defineField({
       name: 'email',
@@ -416,6 +425,16 @@ export const dataDAO = defineType({
       title: 'Pre-Mine / Points Information',
       description: 'Information about pre-mining or points system',
       of: [richTextBlock, imageBlock],
+      fieldset: 'tokenomics',
+    }),
+
+    defineField({
+      name: 'valuePerDataPointUSD',
+      type: 'number',
+      title: 'Value in USD per Data Point',
+      description: 'Estimated value in USD for each data point within this DataDAO',
+      initialValue: 0.00,
+      validation: (Rule) => Rule.min(0),
       fieldset: 'tokenomics',
     }),
 
