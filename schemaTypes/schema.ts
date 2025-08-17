@@ -22,6 +22,18 @@ export const schema = defineType({
       to: [{type: 'dataSource'}],
       validation: (Rule) => Rule.required(),
     }),
+
+    defineField({
+      name: 'reclaimProviderId',
+      type: 'string',
+      title: 'Reclaim Provider ID',
+      description: 'UUID of a Reclaim Protocol provider (https://reclaimprotocol.org/), if this schema uses Reclaim',
+      validation: (Rule) =>
+        Rule.regex(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+          'Must be a valid UUID format'
+        ),
+    }),
   ],
 
   preview: {
