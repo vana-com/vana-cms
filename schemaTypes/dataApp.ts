@@ -102,6 +102,14 @@ export const dataApp = defineType({
     }),
 
     defineField({
+      name: 'schema',
+      type: 'reference',
+      title: 'Schema',
+      description: 'The data schema used by this app',
+      to: [{type: 'schema'}],
+    }),
+
+    defineField({
       name: 'appUrl',
       type: 'url',
       title: 'App URL',
@@ -110,6 +118,22 @@ export const dataApp = defineType({
         Rule.required().uri({
           scheme: ['http', 'https'],
         }),
+    }),
+
+    defineField({
+      name: 'authorizedUrls',
+      type: 'array',
+      title: 'Authorized URLs',
+      description: 'All development and production URLs for this app',
+      of: [
+        {
+          type: 'url',
+          validation: (Rule) =>
+            Rule.uri({
+              scheme: ['http', 'https'],
+            }),
+        },
+      ],
     }),
   ],
 
