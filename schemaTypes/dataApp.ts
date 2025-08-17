@@ -64,6 +64,18 @@ export const dataApp = defineType({
     }),
 
     defineField({
+      name: 'id',
+      type: 'string',
+      title: 'App ID',
+      description: 'Unique identifier using reverse domain notation (e.g., com.vana.netflix-wrapped)',
+      validation: (Rule) =>
+        Rule.required().regex(
+          /^[a-z0-9]+(\.[a-z0-9-]+)*\.[a-z0-9-]+$/,
+          'Must follow reverse domain notation (e.g., com.vana.netflix-wrapped)'
+        ),
+    }),
+
+    defineField({
       name: 'shortDescription',
       type: 'string',
       title: 'Short Description',
@@ -132,6 +144,26 @@ export const dataApp = defineType({
             Rule.uri({
               scheme: ['http', 'https'],
             }),
+        },
+      ],
+    }),
+
+    defineField({
+      name: 'tags',
+      type: 'array',
+      title: 'Tags',
+      description: 'Select tags to categorize and promote this app',
+      of: [
+        {
+          type: 'string',
+          options: {
+            list: [
+              {title: 'Top', value: 'top'},
+              {title: 'Featured', value: 'featured'},
+              {title: 'New', value: 'new'},
+              {title: 'Coming Soon', value: 'coming-soon'},
+            ],
+          },
         },
       ],
     }),
