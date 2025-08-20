@@ -67,11 +67,12 @@ export const dataApp = defineType({
       name: 'id',
       type: 'string',
       title: 'App ID',
-      description: 'Unique identifier using reverse domain notation (e.g., com.vana.netflix-wrapped)',
+      description:
+        'Unique identifier using reverse domain notation (e.g., com.vana.netflix-wrapped)',
       validation: (Rule) =>
         Rule.required().regex(
           /^[a-z0-9]+(\.[a-z0-9-]+)*\.[a-z0-9-]+$/,
-          'Must follow reverse domain notation (e.g., com.vana.netflix-wrapped)'
+          'Must follow reverse domain notation (e.g., com.vana.netflix-wrapped)',
         ),
     }),
 
@@ -166,6 +167,14 @@ export const dataApp = defineType({
           },
         },
       ],
+    }),
+
+    defineField({
+      name: 'grantee',
+      type: 'number',
+      title: 'Data Permission Grantee',
+      description: 'ID of the grantee for data portability operations',
+      validation: (Rule) => Rule.integer().min(0),
     }),
   ],
 
