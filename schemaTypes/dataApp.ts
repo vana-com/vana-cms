@@ -176,6 +176,15 @@ export const dataApp = defineType({
       description: 'ID of the grantee for data portability operations',
       validation: (Rule) => Rule.integer().min(0),
     }),
+
+    defineField({
+      name: 'encryptedPrivateKey',
+      type: 'text',
+      title: 'Encrypted Private Key',
+      description:
+        'The secure identity key for this app. When users grant this app permission to access their data, they authorize this specific key. The app uses it to connect to users\' personal servers and retrieve their data. For security, this key is encrypted with the Vana App\'s public key.',
+      validation: (Rule) => Rule.required(),
+    }),
   ],
 
   preview: {
