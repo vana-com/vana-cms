@@ -85,6 +85,14 @@ export const dataApp = defineType({
     }),
 
     defineField({
+      name: 'approved',
+      type: 'boolean',
+      title: 'Approved',
+      description: 'Set to true if this data app is approved and ready for display.',
+      initialValue: false,
+    }),
+
+    defineField({
       name: 'longDescription',
       type: 'array',
       title: 'Long Description',
