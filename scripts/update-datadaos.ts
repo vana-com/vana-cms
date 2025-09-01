@@ -820,6 +820,13 @@ async function testConnections(): Promise<boolean> {
     const sanityProjects = await sanityClient.projects.list()
     log('info', 'Sanity connection: OK')
 
+    // Log subgraph URL info (without revealing full secret)
+    const url = new URL(config.subgraph.url)
+    log('info', `Subgraph host: ${url.hostname}`)
+    log('info', `Subgraph path: ${url.pathname}`)
+    log('info', `URL contains "mainnet": ${config.subgraph.url.includes('mainnet')}`)
+    log('info', `URL contains "moksha": ${config.subgraph.url.includes('moksha')}`)
+    
     // Test subgraph connection
     const testResponse = await fetch(config.subgraph.url, {
       method: 'POST',
