@@ -836,7 +836,10 @@ async function testConnections(): Promise<boolean> {
     }
 
     const testResult = (await testResponse.json()) as any
-    log('info', 'Subgraph connection: OK', {sampleData: testResult.data?.dlps?.[0]})
+    log('info', 'Subgraph connection: OK', {
+      subgraphUrl: config.subgraph.url,
+      sampleData: testResult.data?.dlps?.[0]
+    })
 
     return true
   } catch (error: any) {
