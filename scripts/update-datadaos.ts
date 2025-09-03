@@ -314,6 +314,7 @@ async function mapSubgraphAuthorityFields(
   iconUrl?: string,
   description?: string,
   dataDAODocumentId?: string,
+  existingData?: SanityDataDAO,
 ): Promise<Partial<SanityUpdateData>> {
   const mapped: Partial<SanityUpdateData> = {}
 
@@ -376,13 +377,13 @@ async function mapSubgraphAuthorityFields(
     mapped.refinerId = subgraphData.latestRefinerId
   }
 
-  // Data name - always from subgraph (refiner schema data)
-  if (subgraphData.refinerSchemaData?.name) {
+  // Data name - from subgraph (refiner schema data), but respect manual override
+  if (subgraphData.refinerSchemaData?.name && !existingData?.manualDataNameOverride) {
     mapped.dataName = subgraphData.refinerSchemaData.name
   }
 
-  // Data description - always from subgraph (refiner schema data)
-  if (subgraphData.refinerSchemaData?.description) {
+  // Data description - from subgraph (refiner schema data), but respect manual override
+  if (subgraphData.refinerSchemaData?.description && !existingData?.manualDataDescriptionOverride) {
     mapped.dataDescription = subgraphData.refinerSchemaData.description
   }
 
@@ -396,23 +397,34 @@ async function mapSubgraphInitialFields(
 ): Promise<Partial<SanityUpdateData>> {
   const mapped: Partial<SanityUpdateData> = {}
 
-  // Name - use subgraph value only if not manually set
-  if (subgraphData.name && subgraphData.name.trim() && !existingData?.name) {
+  // Name - use subgraph value only if not manually set AND manual override is not enabled
+  if (
+    subgraphData.name && 
+    subgraphData.name.trim() && 
+    !existingData?.name && 
+    !existingData?.manualNameOverride
+  ) {
     mapped.name = subgraphData.name.trim()
   }
 
-  // Website - use subgraph value only if not manually set
+  // Website - use subgraph value only if not manually set AND manual override is not enabled
   if (
     subgraphData.website &&
     subgraphData.website.trim() &&
     (subgraphData.website.startsWith('http://') || subgraphData.website.startsWith('https://')) &&
-    !existingData?.website
+    !existingData?.website &&
+    !existingData?.manualWebsiteOverride
   ) {
     mapped.website = subgraphData.website.trim()
   }
 
-  // Icon - use subgraph value only if not manually set
-  if (subgraphData.iconUrl && subgraphData.iconUrl.trim() && !existingData?.icon) {
+  // Icon - use subgraph value only if not manually set AND manual override is not enabled
+  if (
+    subgraphData.iconUrl && 
+    subgraphData.iconUrl.trim() && 
+    !existingData?.icon &&
+    !existingData?.manualIconOverride
+  ) {
     const iconAsset = await uploadImageFromUrl(
       subgraphData.iconUrl.trim(),
       `dlp-${subgraphData.id}-icon`,
@@ -422,8 +434,13 @@ async function mapSubgraphInitialFields(
     }
   }
 
-  // Description - use subgraph metadata, only if not manually set
-  if (subgraphData.metadata && subgraphData.metadata.trim() && !existingData?.description) {
+  // Description - use subgraph metadata, only if not manually set AND manual override is not enabled
+  if (
+    subgraphData.metadata && 
+    subgraphData.metadata.trim() && 
+    !existingData?.description &&
+    !existingData?.manualDescriptionOverride
+  ) {
     mapped.description = subgraphData.metadata.trim()
   }
 
@@ -456,6 +473,7 @@ async function mapSubgraphDataToSanity(
     subgraphData.iconUrl,
     initialFields.description ?? existingData?.description,
     dataDAODocumentId,
+    existingData,
   )
   Object.assign(mapped, authorityFields)
 
@@ -699,10 +717,14 @@ async function updateAllDataDAOs(): Promise<UpdateStats> {
         _id,
         id,
         name,
+        manualNameOverride,
         contractAddress,
         website,
+        manualWebsiteOverride,
         description,
+        manualDescriptionOverride,
         icon,
+        manualIconOverride,
         token,
         contributorCount,
         filesCount,
@@ -711,7 +733,9 @@ async function updateAllDataDAOs(): Promise<UpdateStats> {
         dataSchemaRefined,
         refinerId,
         dataName,
-        dataDescription
+        manualDataNameOverride,
+        dataDescription,
+        manualDataDescriptionOverride
       }
     `,
       {},
@@ -820,13 +844,6 @@ async function testConnections(): Promise<boolean> {
     const sanityProjects = await sanityClient.projects.list()
     log('info', 'Sanity connection: OK')
 
-    // Log subgraph URL info (without revealing full secret)
-    const url = new URL(config.subgraph.url)
-    log('info', `Subgraph host: ${url.hostname}`)
-    log('info', `Subgraph path: ${url.pathname}`)
-    log('info', `URL contains "mainnet": ${config.subgraph.url.includes('mainnet')}`)
-    log('info', `URL contains "moksha": ${config.subgraph.url.includes('moksha')}`)
-    
     // Test subgraph connection
     const testResponse = await fetch(config.subgraph.url, {
       method: 'POST',

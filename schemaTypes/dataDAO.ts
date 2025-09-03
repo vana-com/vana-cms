@@ -115,6 +115,15 @@ export const dataDAO = defineType({
     }),
 
     defineField({
+      name: 'manualNameOverride',
+      type: 'boolean',
+      title: 'Manual Name Override',
+      description: 'When enabled, prevents auto-sync from overwriting the name field',
+      initialValue: false,
+      fieldset: 'basic',
+    }),
+
+    defineField({
       name: 'contractAddress',
       type: 'string',
       title: 'Contract Address',
@@ -140,6 +149,15 @@ export const dataDAO = defineType({
     }),
 
     defineField({
+      name: 'manualIconOverride',
+      type: 'boolean',
+      title: 'Manual Icon Override',
+      description: 'When enabled, prevents auto-sync from overwriting the icon field',
+      initialValue: false,
+      fieldset: 'basic',
+    }),
+
+    defineField({
       name: 'website',
       type: 'url',
       title: 'Website',
@@ -148,6 +166,15 @@ export const dataDAO = defineType({
         Rule.uri({
           scheme: ['http', 'https'],
         }),
+      fieldset: 'basic',
+    }),
+
+    defineField({
+      name: 'manualWebsiteOverride',
+      type: 'boolean',
+      title: 'Manual Website Override',
+      description: 'When enabled, prevents auto-sync from overwriting the website field',
+      initialValue: false,
       fieldset: 'basic',
     }),
 
@@ -168,6 +195,15 @@ export const dataDAO = defineType({
       description:
         'Short description of the DataDAO (synced from on-chain, can be manually edited)',
       validation: (Rule) => Rule.required().max(1000),
+      fieldset: 'basic',
+    }),
+
+    defineField({
+      name: 'manualDescriptionOverride',
+      type: 'boolean',
+      title: 'Manual Description Override',
+      description: 'When enabled, prevents auto-sync from overwriting the description field',
+      initialValue: false,
       fieldset: 'basic',
     }),
 
@@ -302,11 +338,29 @@ export const dataDAO = defineType({
     }),
 
     defineField({
+      name: 'manualDataNameOverride',
+      type: 'boolean',
+      title: 'Manual Data Name Override',
+      description: 'When enabled, prevents auto-sync from overwriting the data name field',
+      initialValue: false,
+      fieldset: 'dataManagement',
+    }),
+
+    defineField({
       name: 'dataDescription',
       type: 'string',
       title: 'Data Description',
       description:
         'Description of the type of data collected (auto-synced from refiner schema, can be manually edited)',
+      fieldset: 'dataManagement',
+    }),
+
+    defineField({
+      name: 'manualDataDescriptionOverride',
+      type: 'boolean',
+      title: 'Manual Data Description Override',
+      description: 'When enabled, prevents auto-sync from overwriting the data description field',
+      initialValue: false,
       fieldset: 'dataManagement',
     }),
 
