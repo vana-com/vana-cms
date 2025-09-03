@@ -83,10 +83,14 @@ export interface SanityDataDAO {
   _id: string
   id: number
   name?: string
+  manualNameOverride?: boolean
   contractAddress?: string
   website?: string
+  manualWebsiteOverride?: boolean
   description?: string
+  manualDescriptionOverride?: boolean
   icon?: any
+  manualIconOverride?: boolean
   token?: {_ref: string, _type: 'reference'}
   contributorCount?: number
   filesCount?: number
@@ -94,7 +98,9 @@ export interface SanityDataDAO {
   dataSchemaRefined?: string
   refinerId?: number
   dataName?: string
+  manualDataNameOverride?: boolean
   dataDescription?: string
+  manualDataDescriptionOverride?: boolean
 }
 
 export interface SanityTokenUpdateData {
@@ -109,10 +115,14 @@ export interface SanityTokenUpdateData {
 export interface SanityUpdateData {
   id?: number
   name?: string
+  manualNameOverride?: boolean
   contractAddress?: string
   website?: string
+  manualWebsiteOverride?: boolean
   description?: string
+  manualDescriptionOverride?: boolean
   icon?: any
+  manualIconOverride?: boolean
   token?: {_ref: string, _type: 'reference'}
   contributorCount?: number
   filesCount?: number
@@ -120,7 +130,9 @@ export interface SanityUpdateData {
   dataSchemaRefined?: string
   refinerId?: number
   dataName?: string
+  manualDataNameOverride?: boolean
   dataDescription?: string
+  manualDataDescriptionOverride?: boolean
   frequencyOfContribution?: string
 }
 
