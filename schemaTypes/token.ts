@@ -58,6 +58,9 @@ export const token = defineType({
       title: 'Associated DataDAO',
       description: 'DataDAO that uses this token (optional - should only be set for VRC-20 tokens associated with a DataDAO)',
       to: [{type: 'dataDAO'}],
+      options: {
+        filter: '!(_id in path("drafts.**"))',
+      },
     }),
   ],
 
