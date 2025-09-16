@@ -56,6 +56,24 @@ export const dataSource = defineType({
       ],
       validation: (Rule) => Rule.required().min(1),
     }),
+
+    defineField({
+      name: 'valuePerDataPointUSD',
+      type: 'number',
+      title: 'Value in USD per Data Point',
+      description: 'Estimated value in USD for each data point within this Datasource',
+      initialValue: 0.00,
+      validation: (Rule) => Rule.min(0),
+    }),
+
+    defineField({
+      name: 'sectorMultiplier',
+      type: 'number',
+      title: 'Sector Multiplier',
+      description: 'Multiplier factor for this data source sector',
+      initialValue: 1,
+      validation: (Rule) => Rule.min(0),
+    }),
   ],
 
   preview: {
