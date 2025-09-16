@@ -492,6 +492,16 @@ export const dataDAO = defineType({
       fieldset: 'tokenomics',
     }),
 
+    defineField({
+      name: 'fdvDiscountPct',
+      type: 'number',
+      title: 'FDV Discount Percentage',
+      description: 'Percentage reduction applied to FDV',
+      initialValue: 0,
+      validation: (Rule) => Rule.min(0).max(100),
+      fieldset: 'tokenomics',
+    }),
+
     // Data Access
     defineField({
       name: 'operationsAllowed',
