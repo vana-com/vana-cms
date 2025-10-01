@@ -38,7 +38,7 @@ export const schema = defineType({
     defineField({
       name: 'sampleData',
       type: 'file',
-      title: 'Data Sample (Refined)',
+      title: 'Data Sample',
       description:
         'A sample data file (e.g., JSON, SQLite) representing the structure of this schema.',
       options: {
