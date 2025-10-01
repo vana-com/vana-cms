@@ -39,7 +39,8 @@ export const schema = defineType({
       name: 'sampleData',
       type: 'file',
       title: 'Data Sample (Refined)',
-      description: 'Sample sqlite/libsql file showing 100 rows of refined dummy data',
+      description:
+        'A sample data file (e.g., JSON, SQLite) representing the structure of this schema.',
       options: {
         accept: '.db,.sqlite,.libsql,.json',
       },
