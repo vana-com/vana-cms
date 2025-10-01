@@ -34,6 +34,16 @@ export const schema = defineType({
           'Must be a valid UUID format'
         ),
     }),
+
+    defineField({
+      name: 'sampleData',
+      type: 'file',
+      title: 'Data Sample (Refined)',
+      description: 'Sample sqlite/libsql file showing 100 rows of refined dummy data',
+      options: {
+        accept: '.db,.sqlite,.libsql,.json',
+      },
+    }),
   ],
 
   preview: {
