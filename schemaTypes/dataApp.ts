@@ -193,6 +193,64 @@ export const dataApp = defineType({
         'The secure identity key for this app. When users grant this app permission to access their data, they authorize this specific key. The app uses it to connect to users\' personal servers and retrieve their data. For security, this key is encrypted with the Vana App\'s public key.',
       validation: (Rule) => Rule.required(),
     }),
+
+    defineField({
+      name: 'category',
+      type: 'string',
+      title: 'Category',
+    }),
+
+    defineField({
+      name: 'submissionDate',
+      type: 'datetime',
+      title: 'Submission Date',
+    }),
+
+    defineField({
+      name: 'submittedForListing',
+      type: 'boolean',
+      title: 'Submitted for Listing',
+    }),
+
+    defineField({
+      name: 'ownerWalletAddress',
+      type: 'string',
+      title: 'Owner Wallet Address',
+    }),
+
+    defineField({
+      name: 'productDescription',
+      type: 'text',
+      title: 'Product Description',
+    }),
+
+    defineField({
+      name: 'listingDescription',
+      type: 'text',
+      title: 'Listing Description',
+    }),
+    defineField({
+      name: 'discordUsername',
+      type: 'string',
+      title: 'Discord Username',
+    }),
+    defineField({
+      name: 'twitterHandle',
+      type: 'string',
+      title: 'Twitter Handle',
+    }),
+    defineField({
+      name: 'createdAt',
+      type: 'datetime',
+      title: 'Created At',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'createdBy',
+      type: 'string',
+      title: 'Created By',
+      readOnly: true,
+    }),
   ],
 
   preview: {
