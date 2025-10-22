@@ -85,11 +85,20 @@ export const dataApp = defineType({
     }),
 
     defineField({
-      name: 'approved',
-      type: 'boolean',
-      title: 'Approved',
-      description: 'Set to true if this data app is approved and ready for display.',
-      initialValue: false,
+      name: 'status',
+      type: 'string',
+      title: 'Status',
+      description: 'Current status of the data app in the review process',
+      initialValue: 'draft',
+      options: {
+        list: [
+          {title: 'Draft', value: 'draft'},
+          {title: 'In Review', value: 'in_review'},
+          {title: 'Approved', value: 'approved'},
+          {title: 'Rejected', value: 'rejected'},
+        ],
+      },
+      validation: (Rule) => Rule.required(),
     }),
 
     defineField({
@@ -196,39 +205,58 @@ export const dataApp = defineType({
 
     defineField({
       name: 'category',
-      type: 'string',
-      title: 'Category',
+      type: 'array',
+      title: 'Categories',
+      description: 'Categories or types of data app (multiple allowed)',
+      of: [
+        {
+          type: 'string',
+          options: {
+            list: [
+              {title: 'Shopping', value: 'shopping'},
+              {title: 'Social Media', value: 'social-media'},
+              {title: 'Entertainment', value: 'entertainment'},
+              {title: 'Music', value: 'music'},
+              {title: 'Finance & Trading', value: 'finance-trading'},
+              {title: 'Health & Fitness', value: 'health-fitness'},
+              {title: 'Travel', value: 'travel'},
+              {title: 'Productivity', value: 'productivity'},
+              {title: 'Communication', value: 'communication'},
+              {title: 'Education', value: 'education'},
+              {title: 'Gaming', value: 'gaming'},
+              {title: 'News & Media', value: 'news-media'},
+              {title: 'Transportation', value: 'transportation'},
+              {title: 'Food & Dining', value: 'food-dining'},
+              {title: 'Professional', value: 'professional'},
+              {title: 'IoT & Devices', value: 'iot-devices'},
+              {title: 'Other', value: 'other'},
+            ],
+          },
+        },
+      ],
     }),
 
     defineField({
-      name: 'submissionDate',
+      name: 'lastStatusUpdatedDate',
       type: 'datetime',
-      title: 'Submission Date',
+      title: 'Last Status Updated Date',
+      description: 'Timestamp when the status field was last changed (e.g., draft -> in_review)',
     }),
 
     defineField({
-      name: 'submittedForListing',
-      type: 'boolean',
-      title: 'Submitted for Listing',
-    }),
-
-    defineField({
-      name: 'ownerWalletAddress',
+      name: 'createdByUserId',
       type: 'string',
-      title: 'Owner Wallet Address',
+      title: 'Created By User ID',
+      description: 'Vana App user ID of the creator',
     }),
 
     defineField({
-      name: 'productDescription',
+      name: 'appCreationSeedPrompt',
       type: 'text',
-      title: 'Product Description',
+      title: 'App Creation Seed Prompt',
+      description: 'The prompt used to seed the app creation process',
     }),
 
-    defineField({
-      name: 'listingDescription',
-      type: 'text',
-      title: 'Listing Description',
-    }),
     defineField({
       name: 'discordUsername',
       type: 'string',
@@ -238,18 +266,6 @@ export const dataApp = defineType({
       name: 'twitterHandle',
       type: 'string',
       title: 'Twitter Handle',
-    }),
-    defineField({
-      name: 'createdAt',
-      type: 'datetime',
-      title: 'Created At',
-      readOnly: true,
-    }),
-    defineField({
-      name: 'createdBy',
-      type: 'string',
-      title: 'Created By',
-      readOnly: true,
     }),
   ],
 
