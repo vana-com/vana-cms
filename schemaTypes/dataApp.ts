@@ -54,12 +54,52 @@ export const dataApp = defineType({
   title: 'Data App',
   type: 'document',
   description: 'Applications built on top of data from Vana DataDAOs',
+  fieldsets: [
+    {
+      name: 'appDetails',
+      title: 'App Details',
+      description: 'Basic information and branding for the data app',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'description',
+      title: 'Description & Content',
+      description: 'Descriptive content and promotional materials',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'technical',
+      title: 'Technical Configuration',
+      description: 'URLs, schemas, and technical settings',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'categorization',
+      title: 'Categorization & Discovery',
+      description: 'Categories and tags for app discovery',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'security',
+      title: 'Security & Permissions',
+      description: 'Data Portability & Permissions configuration',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'developer',
+      title: 'Developer Information',
+      description: 'Creator details and contact information',
+      options: {collapsible: true, collapsed: false},
+    },
+  ],
   fields: [
+    // App Details
     defineField({
       name: 'name',
       type: 'string',
       title: 'Name',
       description: 'Name of the data app',
+      fieldset: 'appDetails',
       validation: (Rule) => Rule.required().max(30),
     }),
 
@@ -69,6 +109,7 @@ export const dataApp = defineType({
       title: 'App ID',
       description:
         'Unique identifier using reverse domain notation (e.g., com.vana.netflix-wrapped)',
+      fieldset: 'appDetails',
       validation: (Rule) =>
         Rule.required().regex(
           /^[a-z0-9]+(\.[a-z0-9-]+)*\.[a-z0-9-]+$/,
@@ -77,18 +118,11 @@ export const dataApp = defineType({
     }),
 
     defineField({
-      name: 'shortDescription',
-      type: 'string',
-      title: 'Short Description',
-      description: 'Brief description of the app (50 characters max)',
-      validation: (Rule) => Rule.required().max(50),
-    }),
-
-    defineField({
       name: 'status',
       type: 'string',
       title: 'Status',
       description: 'Current status of the data app in the review process',
+      fieldset: 'appDetails',
       initialValue: 'draft',
       options: {
         list: [
@@ -102,19 +136,11 @@ export const dataApp = defineType({
     }),
 
     defineField({
-      name: 'longDescription',
-      type: 'array',
-      title: 'Long Description',
-      description: 'Detailed description of the app with rich text formatting',
-      of: [richTextBlock, imageBlock],
-      validation: (Rule) => Rule.required(),
-    }),
-
-    defineField({
       name: 'icon',
       type: 'image',
       title: 'Icon',
       description: 'Logo or icon for the data app',
+      fieldset: 'appDetails',
       options: {
         hotspot: true,
       },
@@ -126,24 +152,39 @@ export const dataApp = defineType({
       type: 'image',
       title: 'Banner',
       description: 'Banner image for the data app',
+      fieldset: 'appDetails',
       options: {
         hotspot: true,
       },
     }),
 
+    // Description & Content
     defineField({
-      name: 'schema',
-      type: 'reference',
-      title: 'Schema',
-      description: 'The data schema used by this app',
-      to: [{type: 'schema'}],
+      name: 'shortDescription',
+      type: 'string',
+      title: 'Short Description',
+      description: 'Brief description of the app (50 characters max)',
+      fieldset: 'description',
+      validation: (Rule) => Rule.required().max(50),
     }),
 
+    defineField({
+      name: 'longDescription',
+      type: 'array',
+      title: 'Long Description',
+      description: 'Detailed description of the app with rich text formatting',
+      fieldset: 'description',
+      of: [richTextBlock, imageBlock],
+      validation: (Rule) => Rule.required(),
+    }),
+
+    // Technical Configuration
     defineField({
       name: 'appUrl',
       type: 'url',
       title: 'App URL',
       description: 'URL to access the data app',
+      fieldset: 'technical',
       validation: (Rule) =>
         Rule.required().uri({
           scheme: ['http', 'https'],
@@ -155,6 +196,7 @@ export const dataApp = defineType({
       type: 'array',
       title: 'Authorized URLs',
       description: 'All development and production URLs for this app',
+      fieldset: 'technical',
       of: [
         {
           type: 'url',
@@ -167,47 +209,29 @@ export const dataApp = defineType({
     }),
 
     defineField({
-      name: 'tags',
-      type: 'array',
-      title: 'Tags',
-      description: 'Select tags to categorize and promote this app',
-      of: [
-        {
-          type: 'string',
-          options: {
-            list: [
-              {title: 'Top', value: 'top'},
-              {title: 'Featured', value: 'featured'},
-              {title: 'New', value: 'new'},
-              {title: 'Coming Soon', value: 'coming-soon'},
-            ],
-          },
-        },
-      ],
+      name: 'schema',
+      type: 'reference',
+      title: 'Schema',
+      description: 'The data schema used by this app',
+      fieldset: 'technical',
+      to: [{type: 'schema'}],
     }),
 
     defineField({
-      name: 'grantee',
-      type: 'number',
-      title: 'Data Permission Grantee',
-      description: 'ID of the grantee for data portability operations',
-      validation: (Rule) => Rule.integer().min(0),
-    }),
-
-    defineField({
-      name: 'encryptedPrivateKey',
+      name: 'appCreationSeedPrompt',
       type: 'text',
-      title: 'Encrypted Private Key',
-      description:
-        'The secure identity key for this app. When users grant this app permission to access their data, they authorize this specific key. The app uses it to connect to users\' personal servers and retrieve their data. For security, this key is encrypted with the Vana App\'s public key.',
-      validation: (Rule) => Rule.required(),
+      title: 'App Creation Seed Prompt',
+      description: 'The prompt used to seed the app creation process',
+      fieldset: 'technical',
     }),
 
+    // Categorization & Discovery
     defineField({
       name: 'category',
       type: 'array',
       title: 'Categories',
       description: 'Categories or types of data app (multiple allowed)',
+      fieldset: 'categorization',
       of: [
         {
           type: 'string',
@@ -237,35 +261,67 @@ export const dataApp = defineType({
     }),
 
     defineField({
-      name: 'lastStatusUpdatedDate',
-      type: 'datetime',
-      title: 'Last Status Updated Date',
-      description: 'Timestamp when the status field was last changed (e.g., draft -> in_review)',
+      name: 'tags',
+      type: 'array',
+      title: 'Tags',
+      description: 'Select tags to categorize and promote this app',
+      fieldset: 'categorization',
+      of: [
+        {
+          type: 'string',
+          options: {
+            list: [
+              {title: 'Top', value: 'top'},
+              {title: 'Featured', value: 'featured'},
+              {title: 'New', value: 'new'},
+              {title: 'Coming Soon', value: 'coming-soon'},
+            ],
+          },
+        },
+      ],
     }),
 
+    // Security & Permissions
+    defineField({
+      name: 'grantee',
+      type: 'number',
+      title: 'Data Permission Grantee',
+      description: 'ID of the grantee for data portability operations',
+      fieldset: 'security',
+      validation: (Rule) => Rule.integer().min(0),
+    }),
+
+    defineField({
+      name: 'encryptedPrivateKey',
+      type: 'text',
+      title: 'Encrypted Private Key',
+      description:
+        "The secure identity key for this app. When users grant this app permission to access their data, they authorize this specific key. The app uses it to connect to users' personal servers and retrieve their data. For security, this key is encrypted with the Vana App's public key.",
+      fieldset: 'security',
+      validation: (Rule) => Rule.required(),
+    }),
+
+    // Developer Information
     defineField({
       name: 'createdByUserId',
       type: 'string',
       title: 'Created By User ID',
       description: 'Vana App user ID of the creator',
-    }),
-
-    defineField({
-      name: 'appCreationSeedPrompt',
-      type: 'text',
-      title: 'App Creation Seed Prompt',
-      description: 'The prompt used to seed the app creation process',
+      fieldset: 'developer',
     }),
 
     defineField({
       name: 'discordUsername',
       type: 'string',
       title: 'Discord Username',
+      fieldset: 'developer',
     }),
+
     defineField({
       name: 'twitterHandle',
       type: 'string',
       title: 'Twitter Handle',
+      fieldset: 'developer',
     }),
   ],
 
