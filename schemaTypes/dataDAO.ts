@@ -369,7 +369,7 @@ export const dataDAO = defineType({
       type: 'number',
       title: 'Refiner ID',
       description: 'ID of the latest refiner (auto-synced from subgraph)',
-      // TODO: ROLLBACK-BNU: readOnly: true,
+      readOnly: true,
       fieldset: 'dataManagement',
     }),
 
@@ -378,7 +378,7 @@ export const dataDAO = defineType({
       type: 'url',
       title: 'Data Schema (Refined)',
       description: 'URL to IPFS or documentation of refined data schema',
-      // TODO: ROLLBACK-BNU: readOnly: true,
+      readOnly: true,
       fieldset: 'dataManagement',
     }),
 
