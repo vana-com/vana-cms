@@ -368,12 +368,12 @@ async function mapSubgraphAuthorityFields(
   mapped.filesCount = subgraphData.totalFileContributions
 
   // Data schema refined URL - always from subgraph (latest refiner)
-  if (!existingData?.dataSchemaRefined || existingData?.dataSchemaRefined === '' && subgraphData.latestSchemaDefinitionUrl) {
+  if (subgraphData.latestSchemaDefinitionUrl) {
     mapped.dataSchemaRefined = subgraphData.latestSchemaDefinitionUrl
   }
-  // TODO: ROLLBACK-BNU: 
+
   // Refiner ID - always from subgraph (latest refiner)
-  if (!existingData?.refinerId || existingData?.refinerId === 0 && subgraphData.latestRefinerId) {
+  if (subgraphData.latestRefinerId) {
     mapped.refinerId = subgraphData.latestRefinerId
   }
 
